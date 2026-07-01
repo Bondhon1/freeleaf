@@ -1,0 +1,22 @@
+appId: com.freeleaf.app
+productName: FreeLeaf
+directories:
+  buildResources: build
+  output: release
+files:
+  - out/**
+  - '!**/*.map'
+extraResources:
+  # Bundled Tectonic engine — copied to <resources>/win/tectonic.exe in the app.
+  - from: resources/win
+    to: win
+    filter:
+      - tectonic.exe
+win:
+  target:
+    - nsis
+  artifactName: ${productName}-${version}-Setup.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true

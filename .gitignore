@@ -1,0 +1,8 @@
+node_modules/
+out/
+release/
+dist-types-node/
+dist-types-web/
+resources/win/tectonic.exe
+*.log
+.freeleaf-build/
