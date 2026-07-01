@@ -51,9 +51,7 @@ export function runTectonic(mainFile: string, outDir: string): Promise<RunResult
     outDir,
     '--synctex',
     '--keep-logs',
-    '--keep-intermediates',
-    '--color',
-    'never'
+    '--keep-intermediates'
   ]
 
   return new Promise((resolve) => {
