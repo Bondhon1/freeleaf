@@ -20,15 +20,16 @@ separately-installed TeX distribution**.
 ## Getting started
 
 ```bash
-npm install        # installs deps AND downloads the Tectonic engine (needs internet once)
+npm install        # installs deps AND downloads Tectonic + biber (needs internet once)
 npm run dev        # launch the app with hot reload
 ```
 
-`npm install` runs `scripts/fetch-tectonic.mjs` via `postinstall`. If you were
-offline during install, run it later with:
+`npm install` runs `npm run fetch-tools` via `postinstall`, which downloads both
+the Tectonic engine and a version-matched `biber` (for biblatex bibliographies).
+If you were offline during install, run it later with:
 
 ```bash
-npm run fetch-tectonic
+npm run fetch-tools
 ```
 
 Open the `samples/hello` folder from the app to try it out: edit `main.tex` and
@@ -40,8 +41,12 @@ watch the PDF update automatically.
 npm run package    # electron-vite build + electron-builder → release/
 ```
 
-The installer bundles `resources/win/tectonic.exe` so the installed app works on
-machines with no TeX distribution.
+The installer bundles `resources/win/tectonic.exe` and `resources/win/biber.exe`
+so the installed app works on machines with no TeX distribution. biber is pinned
+to the version that matches Tectonic's bundled biblatex (see
+`scripts/fetch-biber.mjs`); FreeLeaf forces Tectonic to use this bundled biber
+rather than any biber already on the user's PATH, avoiding "control file version"
+mismatch errors.
 
 ## How it works
 
