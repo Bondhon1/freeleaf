@@ -68,6 +68,10 @@ export function buildAppMenu(win: BrowserWindow): void {
           accelerator: 'CmdOrCtrl+Shift+E',
           click: () => send(win, 'export-pdf')
         },
+        {
+          label: 'Download Source (.zip)…',
+          click: () => send(win, 'export-zip')
+        },
         { type: 'separator' },
         { role: 'quit' }
       ]

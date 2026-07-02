@@ -35,6 +35,8 @@ const api: FreeLeafApi = {
   tectonicAvailable: () => ipcRenderer.invoke('engine:available') as Promise<boolean>,
   exportPdf: (srcPdfPath, suggestedName) =>
     ipcRenderer.invoke('pdf:export', srcPdfPath, suggestedName) as Promise<string | null>,
+  exportSourceZip: (rootPath, suggestedName) =>
+    ipcRenderer.invoke('project:exportZip', rootPath, suggestedName) as Promise<string | null>,
   syncReverse: (pdfPath, page, x, y) =>
     ipcRenderer.invoke('synctex:reverse', pdfPath, page, x, y) as Promise<SyncSource | null>,
   syncForward: (pdfPath, file, line) =>

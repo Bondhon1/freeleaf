@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join, basename } from 'node:path'
-import { readFileSync, copyFileSync } from 'node:fs'
+import { readFileSync, copyFileSync, existsSync } from 'node:fs'
 import {
   loadProject,
   buildTree,
@@ -9,7 +9,8 @@ import {
   createFile,
   createDir,
   rename,
-  deletePath
+  deletePath,
+  exportZip
 } from './project'
 import { compile, cancelCompile } from './compile'
 import { tectonicAvailable } from './tectonic'
@@ -22,6 +23,10 @@ import type { CompileRequest, ProjectInfo } from '../shared/types'
 let mainWindow: BrowserWindow | null = null
 
 function createWindow(): void {
+  // In dev the window icon comes from build/icon.png; in a packaged build the
+  // executable's own icon (set by electron-builder from build/icon.*) is used.
+  const devIcon = join(__dirname, '../../build/icon.png')
+
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -30,6 +35,7 @@ function createWindow(): void {
     show: false,
     backgroundColor: '#1e1e1e',
     title: 'FreeLeaf',
+    ...(existsSync(devIcon) ? { icon: devIcon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -103,6 +109,21 @@ function registerIpc(): void {
       })
       if (res.canceled || !res.filePath) return null
       copyFileSync(srcPdfPath, res.filePath)
+      return res.filePath
+    }
+  )
+
+  // Zip the project's source to a user-chosen location.
+  ipcMain.handle(
+    'project:exportZip',
+    async (_e, rootPath: string, suggestedName: string): Promise<string | null> => {
+      const res = await dialog.showSaveDialog(mainWindow!, {
+        title: 'Download Source (.zip)',
+        defaultPath: suggestedName,
+        filters: [{ name: 'Zip archives', extensions: ['zip'] }]
+      })
+      if (res.canceled || !res.filePath) return null
+      exportZip(rootPath, res.filePath)
       return res.filePath
     }
   )

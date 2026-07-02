@@ -181,6 +181,32 @@ export function rename(oldPath: string, newPath: string): void {
   renameSync(oldPath, newPath)
 }
 
+/**
+ * Zip the project's source into `destZip`, excluding build/VCS/dependency dirs
+ * (the same set hidden from the tree). Windows-only: uses PowerShell
+ * Compress-Archive, consistent with the rest of the app. Items are archived at
+ * the zip root (main.tex, chapters/, images/, …) so the zip re-imports cleanly.
+ */
+export function exportZip(rootPath: string, destZip: string): void {
+  const items = readdirSync(rootPath).filter((n) => !IGNORE.has(n) && n !== basename(destZip))
+  if (items.length === 0) throw new Error('Project is empty — nothing to export.')
+
+  const q = (s: string): string => `'${s.replace(/'/g, "''")}'`
+  const list = items.map(q).join(',')
+  const res = spawnSync(
+    'powershell',
+    [
+      '-NoProfile',
+      '-Command',
+      `Compress-Archive -Path ${list} -DestinationPath ${q(destZip)} -Force`
+    ],
+    { cwd: rootPath, encoding: 'utf8' }
+  )
+  if (res.status !== 0) {
+    throw new Error(`Failed to create zip: ${res.stderr || `exit ${res.status}`}`)
+  }
+}
+
 export function deletePath(path: string): void {
   rmSync(path, { recursive: true, force: true })
 }

@@ -44,6 +44,33 @@ body {
   overflow: hidden;
 }
 
+/* ---------- Thin custom scrollbars (replaces the wide native ones) ---------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 6px;
+  /* Transparent border + padding-box clip makes the thumb read as thin. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -74,6 +101,10 @@ body {
 }
 .toolbar-right {
   margin-left: auto;
+}
+.brand-logo {
+  display: block;
+  margin-right: -4px;
 }
 .brand {
   font-weight: 700;

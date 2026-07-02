@@ -81,6 +81,7 @@ interface AppState {
   patchSettings(patch: Partial<AppSettings>): Promise<void>
   gotoLine(line: number, file?: string | null): Promise<void>
   exportPdf(): Promise<void>
+  exportSourceZip(): Promise<void>
   syncFromPdf(page: number, x: number, y: number): Promise<void>
   syncToPdf(): Promise<void>
   requestTreeAction(kind: 'newFile' | 'newDir'): void
@@ -245,6 +246,12 @@ export const useStore = create<AppState>((set, get) => ({
     const main = get().mainFile
     const name = (main ? basename(main).replace(/\.tex$/i, '') : 'document') + '.pdf'
     await window.api.exportPdf(pdfPath, name)
+  },
+
+  async exportSourceZip() {
+    const project = get().project
+    if (!project) return
+    await window.api.exportSourceZip(project.rootPath, `${project.name}.zip`)
   },
 
   /** Reverse sync: a click in the PDF jumps the editor to the source. */

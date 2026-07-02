@@ -12,10 +12,12 @@ export default function PdfViewer(): JSX.Element {
   const status = useStore((s) => s.compileStatus)
   const pdfHighlight = useStore((s) => s.pdfHighlight)
   const hasPdf = useStore((s) => !!s.lastResult?.pdfPath)
+  const hasProject = useStore((s) => !!s.project)
   const exportPdf = useStore((s) => s.exportPdf)
+  const exportSourceZip = useStore((s) => s.exportSourceZip)
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const [scale, setScale] = useState(1.2)
+  const [scale, setScale] = useState(1.0)
   const [pageCount, setPageCount] = useState(0)
   const renderTokenRef = useRef(0)
   // Keep the current zoom readable inside imperative event handlers.
@@ -136,6 +138,14 @@ export default function PdfViewer(): JSX.Element {
           onClick={() => void exportPdf()}
         >
           ⭳ PDF
+        </button>
+        <button
+          className="btn btn-icon"
+          title="Download source as .zip"
+          disabled={!hasProject}
+          onClick={() => void exportSourceZip()}
+        >
+          ⭳ Source
         </button>
       </div>
       <div className="pdf-scroll" ref={containerRef} onDoubleClick={onDoubleClick}>

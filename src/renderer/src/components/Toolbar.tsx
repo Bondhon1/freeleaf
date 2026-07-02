@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useStore, selectIsDirty } from '../state/store'
 import type { FileNode } from '../../../shared/types'
+import logoUrl from '../assets/logo.svg'
 
 function collectTex(nodes: FileNode[], acc: string[]): void {
   for (const n of nodes) {
@@ -45,6 +46,7 @@ export default function Toolbar(): JSX.Element {
   return (
     <div className="toolbar">
       <div className="toolbar-left">
+        <img className="brand-logo" src={logoUrl} alt="" width={22} height={22} />
         <span className="brand">FreeLeaf</span>
         <button className="btn" onClick={() => void openProjectDialog()}>
           Open Folder

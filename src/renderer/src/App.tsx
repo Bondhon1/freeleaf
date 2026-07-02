@@ -39,6 +39,9 @@ function useMenuActions(): void {
         case 'export-pdf':
           void s.exportPdf()
           break
+        case 'export-zip':
+          void s.exportSourceZip()
+          break
         case 'sync-to-pdf':
           void s.syncToPdf()
           break

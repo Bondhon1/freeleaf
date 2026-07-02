@@ -70,6 +70,7 @@ export type MenuAction =
   | 'save'
   | 'recompile'
   | 'export-pdf'
+  | 'export-zip'
   | 'sync-to-pdf'
 
 export interface AppSettings {
@@ -105,6 +106,8 @@ export interface FreeLeafApi {
   tectonicAvailable(): Promise<boolean>
   /** Copy the produced PDF to a user-chosen location. Returns the dest, or null if cancelled. */
   exportPdf(srcPdfPath: string, suggestedName: string): Promise<string | null>
+  /** Zip the project source to a user-chosen location. Returns the dest, or null if cancelled. */
+  exportSourceZip(rootPath: string, suggestedName: string): Promise<string | null>
   /** SyncTeX reverse lookup: PDF page + point (in PDF points, top-left origin) → source. */
   syncReverse(pdfPath: string, page: number, x: number, y: number): Promise<SyncSource | null>
   /** SyncTeX forward lookup: source file + line → PDF location. */

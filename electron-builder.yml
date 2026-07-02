@@ -17,6 +17,7 @@ extraResources:
       - tectonic.exe
       - biber.exe
 win:
+  icon: build/icon.png
   target:
     - nsis
   artifactName: ${productName}-${version}-Setup.${ext}
