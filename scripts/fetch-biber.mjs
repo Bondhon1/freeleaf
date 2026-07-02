@@ -3,12 +3,13 @@
 // WHY THIS IS PINNED: Tectonic does not ship biber. When a document uses
 // biblatex, Tectonic shells out to whatever `biber` it finds on PATH. biber
 // and biblatex are tightly version-locked (biber reads a `.bcf` control file
-// whose version must match exactly). Tectonic's bundle ships biblatex 3.17,
-// which writes a bcf 3.8 control file — that requires biber 2.17/2.18. A user
-// with a newer biber (e.g. MiKTeX's 2.19, which wants bcf 3.10) would fail with
-// "Found biblatex control file version 3.8, expected version 3.10". Bundling a
-// matching biber and putting resources/win first on PATH makes bibliographies
-// work deterministically regardless of what the user has installed.
+// whose version must match EXACTLY — not just "new enough"). Tectonic's bundle
+// ships biblatex 3.17, which writes a bcf 3.8 control file; only biber 2.17
+// reads bcf 3.8 (2.18 already wants 3.9, 2.19 wants 3.10). A user with a newer
+// biber (e.g. MiKTeX's 2.19) would fail with "Found biblatex control file
+// version 3.8, expected version 3.10". Bundling the matching biber and putting
+// resources/win first on PATH makes bibliographies work deterministically
+// regardless of what the user has installed.
 //
 // Runs on postinstall. Like fetch-tectonic, it is intentionally NON-FATAL: a
 // failed download prints a warning and exits 0 so `npm install` still succeeds.
@@ -21,10 +22,11 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import os from 'node:os'
 
-// Must stay compatible with the biblatex version in Tectonic's bundle (3.17 →
-// bcf 3.8). biber 2.18 reads bcf 3.8. Bump this in lockstep if the pinned
-// Tectonic bundle's biblatex ever changes.
-const BIBER_VERSION = '2.18'
+// Must match the biblatex version in Tectonic's bundle (3.17 → bcf 3.8). Only
+// biber 2.17 reads bcf 3.8. Bump this in lockstep if the pinned Tectonic
+// bundle's biblatex ever changes (verify: `biber main` must not report a
+// "control file version ... expected version" error).
+const BIBER_VERSION = '2.17'
 const ASSET = 'biber-MSWIN64.zip'
 const URL =
   `https://downloads.sourceforge.net/project/biblatex-biber/biblatex-biber/` +

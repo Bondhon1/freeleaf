@@ -4,5 +4,6 @@ release/
 dist-types-node/
 dist-types-web/
 resources/win/tectonic.exe
+resources/win/biber.exe
 *.log
 .freeleaf-build/
