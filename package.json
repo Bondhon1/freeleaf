@@ -7,7 +7,9 @@
   "license": "MIT",
   "scripts": {
     "fetch-tectonic": "node scripts/fetch-tectonic.mjs",
-    "postinstall": "node scripts/fetch-tectonic.mjs",
+    "fetch-biber": "node scripts/fetch-biber.mjs",
+    "fetch-tools": "npm run fetch-tectonic && npm run fetch-biber",
+    "postinstall": "npm run fetch-tools",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json",

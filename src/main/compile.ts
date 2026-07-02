@@ -20,7 +20,7 @@ export async function compile(req: CompileRequest): Promise<CompileResult> {
       entries: [],
       rawLog: '',
       fatal:
-        'Tectonic engine not found. Run `npm run fetch-tectonic` (needs internet) to install it.'
+        'Tectonic engine not found. Run `npm run fetch-tools` (needs internet) to install it.'
     }
   }
 

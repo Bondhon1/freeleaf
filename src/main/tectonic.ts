@@ -1,18 +1,22 @@
 import { app } from 'electron'
 import { spawn, type ChildProcess } from 'node:child_process'
 import { existsSync, mkdirSync } from 'node:fs'
-import { join, basename, dirname } from 'node:path'
+import { join, basename, dirname, delimiter } from 'node:path'
 
 /**
- * Resolve the bundled Tectonic binary. In dev it lives in the repo's
- * resources/win; in a packaged app it is copied to <resources>/win.
+ * Directory holding the bundled command-line tools (tectonic.exe, biber.exe).
+ * In dev it is the repo's resources/win; in a packaged app it is <resources>/win.
  */
-export function tectonicPath(): string {
-  const rel = join('win', 'tectonic.exe')
+function toolsDir(): string {
   if (!app.isPackaged) {
-    return join(app.getAppPath(), 'resources', rel)
+    return join(app.getAppPath(), 'resources', 'win')
   }
-  return join(process.resourcesPath, rel)
+  return join(process.resourcesPath, 'win')
+}
+
+/** Resolve the bundled Tectonic binary. */
+export function tectonicPath(): string {
+  return join(toolsDir(), 'tectonic.exe')
 }
 
 export function tectonicAvailable(): boolean {
@@ -59,9 +63,17 @@ export function runTectonic(mainFile: string, outDir: string): Promise<RunResult
     let stderr = ''
     let killed = false
 
+    // Put the bundled tools dir first on PATH so Tectonic invokes OUR biber
+    // (version-matched to the bundle's biblatex) rather than any biber the user
+    // happens to have installed (e.g. MiKTeX's, which is often too new).
+    const pathKey = Object.keys(process.env).find((k) => k.toLowerCase() === 'path') ?? 'PATH'
     const child = spawn(tectonicPath(), args, {
       cwd: dirname(mainFile),
-      env: { ...process.env, TECTONIC_CACHE_DIR: cacheDir() }
+      env: {
+        ...process.env,
+        TECTONIC_CACHE_DIR: cacheDir(),
+        [pathKey]: `${toolsDir()}${delimiter}${process.env[pathKey] ?? ''}`
+      }
     })
     current = child
 

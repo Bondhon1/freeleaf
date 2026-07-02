@@ -7,11 +7,15 @@ files:
   - out/**
   - '!**/*.map'
 extraResources:
-  # Bundled Tectonic engine — copied to <resources>/win/tectonic.exe in the app.
+  # Bundled command-line tools — copied to <resources>/win in the app.
+  #   tectonic.exe — the LaTeX engine
+  #   biber.exe    — bibliography backend, version-matched to the bundle's
+  #                  biblatex (see scripts/fetch-biber.mjs)
   - from: resources/win
     to: win
     filter:
       - tectonic.exe
+      - biber.exe
 win:
   target:
     - nsis
