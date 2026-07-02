@@ -47,6 +47,12 @@ export function runTectonic(mainFile: string, outDir: string): Promise<RunResult
   cancel()
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true })
 
+  // NB: no --keep-intermediates. With it, Tectonic writes each \include'd file's
+  // .aux into a matching subdirectory of outDir (e.g. .freeleaf-build/chapters/),
+  // and if that subdir doesn't exist the whole compile fails with "The system
+  // cannot find the path specified." Tectonic already runs all needed passes
+  // within a single invocation, so we don't need intermediates persisted; we
+  // only ask for the .log (parsed for problems) and the .synctex.gz (for sync).
   const args = [
     '-X',
     'compile',
@@ -54,8 +60,7 @@ export function runTectonic(mainFile: string, outDir: string): Promise<RunResult
     '--outdir',
     outDir,
     '--synctex',
-    '--keep-logs',
-    '--keep-intermediates'
+    '--keep-logs'
   ]
 
   return new Promise((resolve) => {

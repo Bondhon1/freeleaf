@@ -1,3 +1,4 @@
+import { isAbsolute, resolve } from 'node:path'
 import type { LogEntry } from '../shared/types'
 
 // A compact, self-contained TeX .log parser. It is not exhaustive but handles
@@ -36,12 +37,21 @@ function updateFileStack(line: string, stack: string[]): string | null {
   return stack.length ? stack[stack.length - 1] || null : null
 }
 
-export function parseLog(rawLog: string): LogEntry[] {
+/**
+ * Parse a TeX .log into structured entries. File paths in the log are relative
+ * to the compile working directory, so `baseDir` (that directory) is used to
+ * make each entry's `file` absolute — otherwise the renderer would try to open
+ * it relative to the app's own cwd. Paths already absolute are left as-is.
+ */
+export function parseLog(rawLog: string, baseDir?: string): LogEntry[] {
   if (!rawLog.trim()) return []
   const lines = rawLog.split(/\r?\n/)
   const entries: LogEntry[] = []
   const fileStack: string[] = []
   const seen = new Set<string>()
+
+  const abs = (f: string | null): string | null =>
+    f && baseDir && !isAbsolute(f) ? resolve(baseDir, f) : f
 
   const push = (e: LogEntry): void => {
     const key = `${e.level}|${e.message}|${e.line ?? ''}|${e.file ?? ''}`
@@ -72,7 +82,7 @@ export function parseLog(rawLog: string): LogEntry[] {
       push({
         level: 'error',
         message: msg,
-        file: currentFile,
+        file: abs(currentFile),
         line: lineNo,
         raw: [line, ...context].join('\n')
       })
@@ -85,7 +95,7 @@ export function parseLog(rawLog: string): LogEntry[] {
       push({
         level: 'warning',
         message: warnM[1].trim(),
-        file: currentFile,
+        file: abs(currentFile),
         line: warnM[2] ? parseInt(warnM[2], 10) : null,
         raw: line
       })
@@ -98,7 +108,7 @@ export function parseLog(rawLog: string): LogEntry[] {
       push({
         level: 'typesetting',
         message: line.trim(),
-        file: currentFile,
+        file: abs(currentFile),
         line: boxM[2] ? parseInt(boxM[2], 10) : null,
         raw: line
       })

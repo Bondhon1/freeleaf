@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useStore } from '../state/store'
+import { useEffect, useState } from 'react'
+import { useStore, selectActivePath } from '../state/store'
 import type { FileNode } from '../../../shared/types'
 import NamePrompt from './NamePrompt'
 
@@ -65,11 +65,18 @@ export default function FileTree(): JSX.Element {
   const openFile = useStore((s) => s.openFile)
   const refreshTree = useStore((s) => s.refreshTree)
   const setMainFile = useStore((s) => s.setMainFile)
-  const activePath = useStore((s) => s.activeFile?.path ?? null)
+  const activePath = useStore(selectActivePath)
   const mainFile = useStore((s) => s.mainFile)
+  const treeRequest = useStore((s) => s.treeRequest)
 
   const [ctx, setCtx] = useState<ContextState | null>(null)
   const [prompt, setPrompt] = useState<PromptState>(null)
+
+  // Menu-driven New File / New Folder: prompt at the project root.
+  useEffect(() => {
+    if (!treeRequest || !project) return
+    setPrompt({ kind: treeRequest.kind, dir: project.rootPath })
+  }, [treeRequest, project])
 
   if (!project) return <div className="tree" />
 

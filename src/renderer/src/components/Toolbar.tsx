@@ -14,12 +14,14 @@ export default function Toolbar(): JSX.Element {
   const mainFile = useStore((s) => s.mainFile)
   const setMainFile = useStore((s) => s.setMainFile)
   const runCompile = useStore((s) => s.runCompile)
+  const syncToPdf = useStore((s) => s.syncToPdf)
   const compileStatus = useStore((s) => s.compileStatus)
   const lastResult = useStore((s) => s.lastResult)
   const settings = useStore((s) => s.settings)
   const patchSettings = useStore((s) => s.patchSettings)
   const openProjectDialog = useStore((s) => s.openProjectDialog)
   const isDirty = useStore(selectIsDirty)
+  const hasPdf = !!lastResult?.pdfPath
 
   const texFiles = useMemo(() => {
     if (!project) return []
@@ -60,6 +62,15 @@ export default function Toolbar(): JSX.Element {
             {compileStatus === 'compiling' ? '⏳ Compiling' : '▶ Recompile'}
           </button>
 
+          <button
+            className="btn"
+            disabled={!hasPdf}
+            onClick={() => void syncToPdf()}
+            title="Scroll the PDF to the cursor position (Ctrl+J)"
+          >
+            ⌖ Sync to PDF
+          </button>
+
           <label className="main-select">
             Main:
             <select
@@ -75,7 +86,7 @@ export default function Toolbar(): JSX.Element {
             </select>
           </label>
 
-          <label className="auto-toggle" title="Automatically recompile after edits">
+          <label className="auto-toggle" title="Recompile automatically when a project opens and on save (Ctrl+S)">
             <input
               type="checkbox"
               checked={settings?.autoCompile ?? true}

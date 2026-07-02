@@ -5,9 +5,11 @@ import {
   writeFileSync,
   mkdirSync,
   renameSync,
-  rmSync
+  rmSync,
+  existsSync
 } from 'node:fs'
-import { join, basename } from 'node:path'
+import { spawnSync } from 'node:child_process'
+import { join, basename, extname } from 'node:path'
 import type { FileNode, ProjectInfo } from '../shared/types'
 
 const IGNORE = new Set(['node_modules', '.git', '.freeleaf-build', '.DS_Store'])
@@ -78,6 +80,79 @@ export function loadProject(rootPath: string): ProjectInfo {
     tree,
     mainFile: guessMainFile(tree)
   }
+}
+
+const STARTER_MAIN = `\\documentclass{article}
+
+\\title{Untitled}
+\\author{}
+\\date{\\today}
+
+\\begin{document}
+\\maketitle
+
+Start writing here.
+
+\\end{document}
+`
+
+/** Pick a directory path that does not exist yet, appending " (n)" if needed. */
+function uniqueDir(parent: string, name: string): string {
+  let candidate = join(parent, name)
+  let n = 2
+  while (existsSync(candidate)) {
+    candidate = join(parent, `${name} (${n++})`)
+  }
+  return candidate
+}
+
+/**
+ * Create a new project folder under `parent` with a starter main.tex, and
+ * return it loaded. `name` is sanitized to a safe folder name.
+ */
+export function createProject(parent: string, name: string): ProjectInfo {
+  const safe = name.trim().replace(/[\\/:*?"<>|]/g, '_') || 'Untitled Project'
+  const root = uniqueDir(parent, safe)
+  mkdirSync(root, { recursive: true })
+  writeFileSync(join(root, 'main.tex'), STARTER_MAIN, 'utf8')
+  return loadProject(root)
+}
+
+/**
+ * Extract a project .zip (e.g. an Overleaf export) into a sibling folder and
+ * return it loaded. Windows-only: uses PowerShell Expand-Archive, matching the
+ * approach in scripts/fetch-*.mjs, so no unzip dependency is needed.
+ *
+ * Overleaf zips place files at the archive root; if instead everything is
+ * nested under a single top-level folder we unwrap that so the project root is
+ * the folder actually containing the .tex files.
+ */
+export function importZip(zipPath: string): ProjectInfo {
+  const parent = join(zipPath, '..')
+  const base = basename(zipPath, extname(zipPath))
+  const root = uniqueDir(parent, base)
+  mkdirSync(root, { recursive: true })
+
+  const res = spawnSync(
+    'powershell',
+    [
+      '-NoProfile',
+      '-Command',
+      `Expand-Archive -Path "${zipPath}" -DestinationPath "${root}" -Force`
+    ],
+    { encoding: 'utf8' }
+  )
+  if (res.status !== 0) {
+    rmSync(root, { recursive: true, force: true })
+    throw new Error(`Failed to extract zip: ${res.stderr || `exit ${res.status}`}`)
+  }
+
+  // Unwrap a single top-level directory (common when zipping a whole folder).
+  const entries = readdirSync(root).filter((e) => !IGNORE.has(e))
+  if (entries.length === 1 && statSync(join(root, entries[0])).isDirectory()) {
+    return loadProject(join(root, entries[0]))
+  }
+  return loadProject(root)
 }
 
 // --- File operations (used by IPC) ---

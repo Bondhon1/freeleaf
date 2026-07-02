@@ -4,6 +4,8 @@ import { basename } from '../util/path'
 export default function Welcome(): JSX.Element {
   const openProjectDialog = useStore((s) => s.openProjectDialog)
   const openProject = useStore((s) => s.openProject)
+  const newProject = useStore((s) => s.newProject)
+  const importProjectZip = useStore((s) => s.importProjectZip)
   const engineAvailable = useStore((s) => s.engineAvailable)
   const recents = useStore((s) => s.settings?.recentProjects ?? [])
 
@@ -15,14 +17,22 @@ export default function Welcome(): JSX.Element {
 
         {!engineAvailable && (
           <div className="engine-warning">
-            ⚠ Tectonic engine not found. Run <code>npm run fetch-tectonic</code> (needs internet)
-            to install it, then restart.
+            ⚠ Tectonic engine not found. Run <code>npm run fetch-tools</code> (needs internet) to
+            install it, then restart.
           </div>
         )}
 
-        <button className="btn btn-primary btn-lg" onClick={() => void openProjectDialog()}>
-          Open a project folder
-        </button>
+        <div className="welcome-actions">
+          <button className="btn btn-primary btn-lg" onClick={() => void newProject()}>
+            New project
+          </button>
+          <button className="btn btn-lg" onClick={() => void openProjectDialog()}>
+            Open folder
+          </button>
+          <button className="btn btn-lg" onClick={() => void importProjectZip()}>
+            Import .zip
+          </button>
+        </div>
 
         {recents.length > 0 && (
           <div className="recents">

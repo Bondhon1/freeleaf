@@ -22,28 +22,19 @@ import { oneDark } from './editorTheme'
 import { useStore } from '../state/store'
 
 function buildExtensions(theme: 'light' | 'dark'): Extension[] {
-  const onChange = EditorView.updateListener.of((u) => {
+  // Mirror edits into the store and keep the store's caret line current (used
+  // by forward sync). Save/recompile shortcuts are owned by the application
+  // menu's accelerators (Ctrl+S, Ctrl+Enter), so they are not bound here.
+  const onUpdate = EditorView.updateListener.of((u) => {
     if (u.docChanged) useStore.getState().setEditorContents(u.state.doc.toString())
-  })
-
-  const appKeymap = keymap.of([
-    {
-      key: 'Mod-s',
-      preventDefault: true,
-      run: () => {
-        void useStore.getState().saveActiveFile()
-        return true
-      }
-    },
-    {
-      key: 'Mod-Enter',
-      preventDefault: true,
-      run: () => {
-        void useStore.getState().runCompile()
-        return true
+    if (u.docChanged || u.selectionSet) {
+      const path = useStore.getState().activeFile?.path
+      if (path) {
+        const line = u.state.doc.lineAt(u.state.selection.main.head).number
+        useStore.getState().setCursor(path, line)
       }
     }
-  ])
+  })
 
   return [
     lineNumbers(),
@@ -56,9 +47,8 @@ function buildExtensions(theme: 'light' | 'dark'): Extension[] {
     highlightSelectionMatches(),
     StreamLanguage.define(stex),
     syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-    appKeymap,
     keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap, indentWithTab]),
-    onChange,
+    onUpdate,
     EditorView.lineWrapping,
     ...(theme === 'dark' ? [oneDark] : [])
   ]

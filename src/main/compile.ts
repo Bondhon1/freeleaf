@@ -48,7 +48,9 @@ export async function compile(req: CompileRequest): Promise<CompileResult> {
   }
   const rawLog = [result.stdout, result.stderr, logText].filter(Boolean).join('\n')
 
-  const entries: LogEntry[] = parseLog(logText)
+  // Log paths are relative to the compile cwd (the main file's directory);
+  // resolve them so the renderer can open the right file.
+  const entries: LogEntry[] = parseLog(logText, dirname(mainAbs))
   const hasPdf = existsSync(pdfPath)
   const ok = result.code === 0 && hasPdf
 
