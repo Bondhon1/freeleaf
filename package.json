@@ -1,6 +1,6 @@
 {
   "name": "freeleaf",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A free, local, Overleaf-style LaTeX editor powered by a bundled Tectonic engine",
   "main": "./out/main/index.js",
   "author": "FreeLeaf",
